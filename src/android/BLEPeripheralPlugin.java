@@ -299,6 +299,7 @@ public class BLEPeripheralPlugin extends CordovaPlugin {
 
             Log.w(TAG, "App requested to advertise name " + advertisedName + " but this feature is not currently supported by the Android version of the plugin");
 
+            bluetoothAdapter.setName(advertisedName);
             BluetoothLeAdvertiser bluetoothLeAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
 
             AdvertiseData advertisementData = getAdvertisementData(serviceUUID);
