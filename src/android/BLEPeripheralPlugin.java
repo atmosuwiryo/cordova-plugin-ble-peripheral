@@ -149,7 +149,7 @@ public class BLEPeripheralPlugin extends CordovaPlugin {
                 return false;
             }
 
-            gattServer = bluetoothManager.openGattServer(cordova.getContext(), gattServerCallback);
+            gattServer = bluetoothManager.openGattServer(cordova.getActivity(), gattServerCallback);
 
         }
 
