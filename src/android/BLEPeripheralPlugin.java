@@ -64,6 +64,7 @@ public class BLEPeripheralPlugin extends CordovaPlugin {
     private static final String ADD_CHARACTERISTIC = "addCharacteristic";
     private static final String PUBLISH_SERVICE = "publishService";
     private static final String START_ADVERTISING = "startAdvertising";
+    private static final String STOP_ADVERTISING = "stopAdvertising";
     private static final String SET_CHARACTERISTIC_VALUE = "setCharacteristicValue";
 
     private static final String SET_CHARACTERISTIC_VALUE_CHANGED_LISTENER = "setCharacteristicValueChangedListener";
@@ -307,6 +308,14 @@ public class BLEPeripheralPlugin extends CordovaPlugin {
             bluetoothLeAdvertiser.startAdvertising(advertiseSettings, advertisementData, advertiseCallback);
 
             advertisingStartedCallback = callbackContext;
+
+        } else if (action.equals(STOP_ADVERTISING)) {
+
+            BluetoothLeAdvertiser bluetoothLeAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
+
+            bluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
+
+            callbackContext.success();
 
         } else if (action.equals(SET_CHARACTERISTIC_VALUE)) {
 

@@ -181,6 +181,14 @@ module.exports = {
 
     },
 
+    stopAdvertising: function() {
+
+        return new Promise(function(resolve, reject) {
+            cordova.exec(resolve, reject, 'BLEPeripheral', 'stopAdvertising', []);
+        });
+
+    },
+
     // setting the value automatically notifies subscribers
     setCharacteristicValue: function(service, characteristic, value) {
 
