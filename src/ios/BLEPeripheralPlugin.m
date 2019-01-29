@@ -165,6 +165,8 @@ static NSDictionary *dataToArrayBuffer(NSData* data) {
 
 - (void)stopAdvertising:(CDVInvokedUrlCommand *)command {
     [manager stopAdvertising];
+
+    [manager removeAllServices];
     
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
