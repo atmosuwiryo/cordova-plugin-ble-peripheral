@@ -141,7 +141,10 @@ public class BLEPeripheralPlugin extends CordovaPlugin {
                 return false;
             }
             bluetoothAdapter = bluetoothManager.getAdapter();
+        }
 
+        if (gattServer == null && bluetoothAdapter != null && bluetoothAdapter.getState() == BluetoothAdapter.STATE_ON) {
+            Activity activity = cordova.getActivity();
             boolean hardwareSupportsPeripherals = bluetoothAdapter.isMultipleAdvertisementSupported();
             if (!hardwareSupportsPeripherals) {
                 String errorMessage = "This hardware does not support creating Bluetooth Low Energy peripherals";
@@ -150,8 +153,13 @@ public class BLEPeripheralPlugin extends CordovaPlugin {
                 return false;
             }
 
+            BluetoothManager bluetoothManager = (BluetoothManager) activity.getSystemService(Context.BLUETOOTH_SERVICE);
+            if (bluetoothManager == null) {
+                LOG.e(TAG, "bluetoothManager is null");
+                callbackContext.error("Unable to get the Bluetooth Manager");
+                return false;
+            }
             gattServer = bluetoothManager.openGattServer(cordova.getContext(), gattServerCallback);
-
         }
 
         boolean validAction = true;
@@ -371,6 +379,10 @@ public class BLEPeripheralPlugin extends CordovaPlugin {
 
         if (action != null && action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
             final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+            if (state != BluetoothAdapter.STATE_ON && gattServer != null) {
+                gattServer.close();
+                gattServer = null;
+            }
             sendBluetoothStateChange(state);
         }
     }
