@@ -151,7 +151,6 @@ static NSDictionary *dataToArrayBuffer(NSData* data) {
 }
 
 - (void)startAdvertising:(CDVInvokedUrlCommand *)command {
-
     NSString *serviceUUIDString = [command.arguments objectAtIndex:0];
     CBUUID *serviceUUID = [CBUUID UUIDWithString: serviceUUIDString];
     NSString *localName = [command.arguments objectAtIndex:1];
@@ -162,6 +161,13 @@ static NSDictionary *dataToArrayBuffer(NSData* data) {
                                }];
 
     startAdvertisingCallbackId = [command.callbackId copy];
+}
+
+- (void)stopAdvertising:(CDVInvokedUrlCommand *)command {
+    [manager stopAdvertising];
+    
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)setCharacteristicValueChangedListener:(CDVInvokedUrlCommand *)command {
