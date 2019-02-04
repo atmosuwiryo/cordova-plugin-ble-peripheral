@@ -64,6 +64,7 @@ public class BLEPeripheralPlugin extends CordovaPlugin {
     private static final String ADD_CHARACTERISTIC = "addCharacteristic";
     private static final String PUBLISH_SERVICE = "publishService";
     private static final String START_ADVERTISING = "startAdvertising";
+    private static final String STOP_ADVERTISING = "stopAdvertising";
     private static final String SET_CHARACTERISTIC_VALUE = "setCharacteristicValue";
 
     private static final String SET_CHARACTERISTIC_VALUE_CHANGED_LISTENER = "setCharacteristicValueChangedListener";
@@ -140,7 +141,10 @@ public class BLEPeripheralPlugin extends CordovaPlugin {
                 return false;
             }
             bluetoothAdapter = bluetoothManager.getAdapter();
+        }
 
+        if (gattServer == null && bluetoothAdapter != null && bluetoothAdapter.getState() == BluetoothAdapter.STATE_ON) {
+            Activity activity = cordova.getActivity();
             boolean hardwareSupportsPeripherals = bluetoothAdapter.isMultipleAdvertisementSupported();
             if (!hardwareSupportsPeripherals) {
                 String errorMessage = "This hardware does not support creating Bluetooth Low Energy peripherals";
@@ -149,8 +153,13 @@ public class BLEPeripheralPlugin extends CordovaPlugin {
                 return false;
             }
 
+            BluetoothManager bluetoothManager = (BluetoothManager) activity.getSystemService(Context.BLUETOOTH_SERVICE);
+            if (bluetoothManager == null) {
+                LOG.e(TAG, "bluetoothManager is null");
+                callbackContext.error("Unable to get the Bluetooth Manager");
+                return false;
+            }
             gattServer = bluetoothManager.openGattServer(cordova.getContext(), gattServerCallback);
-
         }
 
         boolean validAction = true;
@@ -308,6 +317,16 @@ public class BLEPeripheralPlugin extends CordovaPlugin {
 
             advertisingStartedCallback = callbackContext;
 
+        } else if (action.equals(STOP_ADVERTISING)) {
+
+            BluetoothLeAdvertiser bluetoothLeAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
+
+            bluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
+
+            gattServer.clearServices();
+
+            callbackContext.success();
+
         } else if (action.equals(SET_CHARACTERISTIC_VALUE)) {
 
             UUID serviceUUID = uuidFromString(args.getString(0));
@@ -362,6 +381,10 @@ public class BLEPeripheralPlugin extends CordovaPlugin {
 
         if (action != null && action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
             final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+            if (state != BluetoothAdapter.STATE_ON && gattServer != null) {
+                gattServer.close();
+                gattServer = null;
+            }
             sendBluetoothStateChange(state);
         }
     }
